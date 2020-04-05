@@ -1,19 +1,44 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
+    <top-header></top-header>
+    <tab-bar :titles="titles" :current-index="currentIndex" @select="changeRouter"></tab-bar>
+    <keep-alive>
+      <router-view></router-view>
+    </keep-alive>
   </div>
 </template>
 
+<script>
+  import TopHeader from "./components/content/header/TopHeader.vue";
+  import TabBar from "./components/content/tab-bar/TabBar.vue";
+
+  export default {
+    name: "App",
+    data() {
+      return {
+        titles: [
+          {title: "推荐", router: "/recommend"},
+          {title: "歌手", router: "/singer"},
+          {title: "排行", router: "/rank"},
+          {title: "搜索", router: "/search"}
+        ],
+        currentIndex: 0
+      }
+    },
+    components: {
+      TopHeader,
+      TabBar
+    },
+    methods: {
+      changeRouter(router, index) {
+        this.$router.push(router);
+        this.currentIndex = index;
+      }
+    }
+  }
+
+</script>
+
 <style lang="stylus">
-#app
-  font-family Avenir, Helvetica, Arial, sans-serif
-  -webkit-font-smoothing antialiased
-  -moz-osx-font-smoothing grayscale
-  text-align center
-  color #2c3e50
-  margin-top 60px
+
 </style>
