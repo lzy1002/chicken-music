@@ -48,6 +48,12 @@
         }
 
       },
+      scrollTo(...args) {
+        this.scroll.scrollTo(...args);
+      },
+      scrollToElement(...args) {
+        this.scroll.scrollToElement(...args);
+      },
       refresh() {
         this.scroll.refresh();
       }

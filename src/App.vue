@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <top-header></top-header>
-    <tab-bar :titles="titles" :current-index="currentIndex" @select="changeRouter"></tab-bar>
+    <tab-bar :titles="titles"></tab-bar>
     <keep-alive>
       <router-view></router-view>
     </keep-alive>
@@ -21,19 +21,12 @@
           {title: "歌手", router: "/singer"},
           {title: "排行", router: "/rank"},
           {title: "搜索", router: "/search"}
-        ],
-        currentIndex: 0
+        ]
       }
     },
     components: {
       TopHeader,
       TabBar
-    },
-    methods: {
-      changeRouter(router, index) {
-        this.$router.push(router);
-        this.currentIndex = index;
-      }
     }
   }
 

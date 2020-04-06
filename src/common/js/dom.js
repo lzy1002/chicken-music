@@ -9,3 +9,11 @@ function hasClass(el, cls) {  // 判断传入的元素身上是否有传入的�
   let reg = new RegExp("(^|\\s)" + cls + "(\\s|$)");
   return reg.test(el.className);
 }
+
+export function attr(el, key, val) {
+  let prefix = "data-";
+  if(!val) {
+    return el.getAttribute(prefix + key);
+  }
+  el.setAttribute(prefix + key, val);
+}

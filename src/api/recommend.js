@@ -14,7 +14,7 @@ export function getSliderData() {  // 获取轮播图数据
   return jsonp(url, data, options);
 }
 
-export function getDiscList() {
+export function getDiscList() {  // 获取推荐歌单列表
   const url = "/api/discList";
 
   const data = Object.assign({}, commonParams, {
