@@ -20,6 +20,10 @@
   export default {
     name: "SingerDetail",
     created() {
+      if(!this.singer.mid) {
+        this.$router.back();
+        return;
+      }
       this._getSingerDetail();
     },
     data() {

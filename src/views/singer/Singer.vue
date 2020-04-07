@@ -1,29 +1,31 @@
 <template>
-  <scroll class="singer-wrapper" :data="singerList" :listen-scroll="listenScroll" @scroll="scroll" ref="singerWrapper">
-    <ul class="title-box">
-      <li class="title-item" v-for="item in singerList" ref="titleItem">
-        <h1 class="title">{{item.title}}</h1>
-        <ul class="singer-box">
-          <li class="singer-item" v-for="singer in item.list" @click="toDetail(singer)">
-            <div class="img-box">
-              <img :src="singer.avatar" alt="">
-            </div>
-            <div class="content-box">
-              <span class="name">{{singer.name}}</span>
-            </div>
-          </li>
-        </ul>
-      </li>
-    </ul>
-    <div class="nav-bar" @touchstart.prevent.stop="navBarTouchStart" @touchmove.prevent.stop="navBarTouchMove" ref="navBar">
-      <span class="nav-bar-item" :class="{active: currentIndex === index}" v-for="(item, index) in singerList" :data-index="index">{{item.title | formatTitle}}</span>
-    </div>
-    <div v-show="posY <= 0" class="fixed-title" ref="fixedTitle">{{fixedTitle}}</div>
+  <div class="singer-wrapper">
+    <scroll class="singer-scroll" :data="singerList" :listen-scroll="listenScroll" @scroll="scroll" ref="singerWrapper">
+      <ul class="title-box">
+        <li class="title-item" v-for="item in singerList" ref="titleItem">
+          <h1 class="title">{{item.title}}</h1>
+          <ul class="singer-box">
+            <li class="singer-item" v-for="singer in item.list" @click="toDetail(singer)">
+              <div class="img-box">
+                <img :src="singer.avatar" alt="">
+              </div>
+              <div class="content-box">
+                <span class="name">{{singer.name}}</span>
+              </div>
+            </li>
+          </ul>
+        </li>
+      </ul>
+      <div class="nav-bar" @touchstart.prevent.stop="navBarTouchStart" @touchmove.prevent.stop="navBarTouchMove" ref="navBar">
+        <span class="nav-bar-item" :class="{active: currentIndex === index}" v-for="(item, index) in singerList" :data-index="index">{{item.title | formatTitle}}</span>
+      </div>
+      <div v-show="posY <= 0" class="fixed-title" ref="fixedTitle">{{fixedTitle}}</div>
+    </scroll>
 
     <transition name="move">
       <router-view></router-view>
     </transition>
-  </scroll>
+  </div>
 </template>
 
 <script>
@@ -198,62 +200,65 @@
     right 0
     bottom 0
     overflow hidden
-    .title-box
-      .title-item
-        padding-bottom 30px
-        .title
-          width 100%
-          height 30px
-          line-height 30px
-          padding-left 20px
-          font-size $font-size-small
-          color $color-text-l
-          background-color #333
-        .singer-box
-          .singer-item
-            display flex
-            padding 20px 0 0 30px
-            .img-box
-              width 50px
-              height 50px
-              border-radius 50%
-              overflow hidden
-              img
-                width 100%
-            .content-box
-              height 50px
-              line-height 50px
-              padding-left 20px
-              font-size $font-size-medium
-              color $color-text-l
-    .nav-bar
-      width 20px
-      padding 20px 0
-      position absolute
-      top 50%
-      right 0
-      transform translateY(-50%)
-      background-color $color-background-d
-      border-radius 10px
-      .nav-bar-item
-        display block
+    .singer-scroll
+      width 100%
+      height 100%
+      .title-box
+        .title-item
+          padding-bottom 30px
+          .title
+            width 100%
+            height 30px
+            line-height 30px
+            padding-left 20px
+            font-size $font-size-small
+            color $color-text-l
+            background-color #333
+          .singer-box
+            .singer-item
+              display flex
+              padding 20px 0 0 30px
+              .img-box
+                width 50px
+                height 50px
+                border-radius 50%
+                overflow hidden
+                img
+                  width 100%
+              .content-box
+                height 50px
+                line-height 50px
+                padding-left 20px
+                font-size $font-size-medium
+                color $color-text-l
+      .nav-bar
         width 20px
-        height 18px
-        line-height 18px
-        text-align center
-        font-size $font-size-small-s
+        padding 20px 0
+        position absolute
+        top 50%
+        right 0
+        transform translateY(-50%)
+        background-color $color-background-d
+        border-radius 10px
+        .nav-bar-item
+          display block
+          width 20px
+          height 18px
+          line-height 18px
+          text-align center
+          font-size $font-size-small-s
+          color $color-text-l
+          &.active
+            color $color-theme
+      .fixed-title
+        position absolute
+        top 0
+        left 0
+        right 0
+        height 30px
+        line-height 30px
+        padding-left 20px
+        font-size $font-size-small
         color $color-text-l
-        &.active
-          color $color-theme
-    .fixed-title
-      position absolute
-      top 0
-      left 0
-      right 0
-      height 30px
-      line-height 30px
-      padding-left 20px
-      font-size $font-size-small
-      color $color-text-l
-      background-color #333
+        background-color #333
 </style>

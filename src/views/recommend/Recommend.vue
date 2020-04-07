@@ -21,6 +21,10 @@
             </div>
           </li>
         </ul>
+
+        <div class="loading-box" v-if="!discList.length">
+          <loading></loading>
+        </div>
       </div>
     </div>
   </scroll>
@@ -29,6 +33,7 @@
 <script>
   import Slider from "../../components/common/silder/Slider.vue";
   import Scroll from "../../components/common/scroll/Scroll.vue";
+  import Loading from "../../components/common/loading/Loading.vue";
 
   import {ERR_OK} from "../../api/config.js";
 
@@ -69,7 +74,8 @@
     },
     components: {
       Slider,
-      Scroll
+      Scroll,
+      Loading
     }
   }
 </script>
@@ -108,5 +114,11 @@
             font-size $font-size-medium
             .desc
               color $color-text-d
+      .loading-box
+        position absolute
+        top 50%
+        left 0
+        width 100%
+        transform translate3d(0, -50%, 0)
 
 </style>

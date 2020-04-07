@@ -2,6 +2,8 @@
   <div id="app">
     <top-header></top-header>
     <tab-bar :titles="titles"></tab-bar>
+    <player></player>
+
     <keep-alive>
       <router-view></router-view>
     </keep-alive>
@@ -11,6 +13,7 @@
 <script>
   import TopHeader from "./components/content/header/TopHeader.vue";
   import TabBar from "./components/content/tab-bar/TabBar.vue";
+  import Player from "./components/content/player/Player.vue";
 
   export default {
     name: "App",
@@ -26,7 +29,8 @@
     },
     components: {
       TopHeader,
-      TabBar
+      TabBar,
+      Player
     }
   }
 
