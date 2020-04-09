@@ -8,7 +8,7 @@ export default {
     state.playing = flag;
   },
   [types.SET_PLAY_MODE](state, mode) {
-    state.mode = mode;
+    state.playMode = mode;
   },
   [types.SET_PLAY_LIST](state, list) {
     state.playList = list;

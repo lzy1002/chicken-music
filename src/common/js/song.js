@@ -1,3 +1,9 @@
+import {request} from "../../api/request.js";
+import {commonParams} from "../../api/config.js";
+import {ERR_OK} from "../../api/config.js";
+
+import {Base64} from "js-base64";
+
 export class Song {
   constructor({songid, songmid, songname, albumname, duration, singer, image}) {
     this.songid = songid;
@@ -8,6 +14,41 @@ export class Song {
     this.singer = singer;
     this.image = image;
   }
+  getLyric() {
+    if(this.lyric) {
+      return Promise.resolve(this.lyric);
+    }
+
+    return new Promise((resolve, reject) => {
+      getLyric(this.songmid).then(res => {
+        if(res.data.code === ERR_OK) {
+          this.lyric = Base64.decode(res.data.lyric);
+          resolve(this.lyric);
+        }
+      })
+    })
+  }
+
+}
+
+function getLyric(mid) {
+  const url = "/api/lyric";
+
+  const data = Object.assign({}, commonParams, {
+    songmid: mid,
+    pcachetime: +new Date(),
+    platform: "yqq",
+    hostUin: 0,
+    needNewCode: 0,
+    g_tk: 67232076,
+    format: "json"
+  });
+
+  return request({
+    url,
+    params: data
+  })
+
 }
 
 export function createSong(musicData) {

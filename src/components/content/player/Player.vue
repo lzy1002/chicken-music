@@ -3,45 +3,54 @@
     <transition name="normal" @enter="enter" @after-enter="afterEnter" @leave="leave" @after-leave="afterLeave">
       <div class="normal-player" v-show="fullScreen">
         <div class="background">
-          <img src="https://y.gtimg.cn/music/photo_new/T002R300x300M000000QgFcm0v8WaF.jpg?max_age=2592000" alt="">
+          <img :src="currentSong.image" alt="">
         </div>
 
         <div class="top">
           <div class="hide" @click="hide">
             <i class="icon-back"></i>
           </div>
-          <h1 class="song-name">意外</h1>
-          <p class="singer-name">薛之谦</p>
+          <h1 class="song-name" v-html="currentSong.songname"></h1>
+          <p class="singer-name" v-html="currentSong.singer"></p>
         </div>
 
         <div class="middle">
           <div class="middle-l">
             <div class="cd-wrapper" ref="normalCd">
-              <div class="cd-box">
-                <img src="https://y.gtimg.cn/music/photo_new/T002R300x300M000000QgFcm0v8WaF.jpg?max_age=2592000" alt="">
+              <div class="cd-box" :class="rotatePlay">
+                <img :src="currentSong.image" alt="">
               </div>
             </div>
           </div>
-          <!---->
+          <div class="middle-r">
+            <div class="lyric-box">
+              <div class="content">
+                <p class="lyric-text"></p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="bottom">
           <div class="progress-wrapper">
-            <span class="now-t">0:00</span>
-            <span class="total-t">0:00</span>
+            <span class="now-t">{{currentTime | secondToMinute}}</span>
+            <div class="progress-bar-box">
+              <progress-bar :current-time="currentTime" :duration-time="durationTime" @progressChange="progressChange"></progress-bar>
+            </div>
+            <span class="total-t">{{durationTime | secondToMinute}}</span>
           </div>
           <div class="control-wrapper">
             <div class="left">
-              <i class="icon-sequence"></i>
+              <i :class="modeIcon" @click="changeMode"></i>
             </div>
             <div class="left">
-              <i class="icon-prev"></i>
+              <i class="icon icon-prev" :class="{disable: !songReady}" @click="prev"></i>
             </div>
             <div class="center">
-              <i class="icon-play"></i>
+              <i class="icon" :class="[playIcon, {disable: !songReady}]"  @click="togglePlaying"></i>
             </div>
             <div class="right">
-              <i class="icon-next"></i>
+              <i class="icon icon-next" :class="{disable: !songReady}" @click="next"></i>
             </div>
             <div class="right">
               <i class="icon-not-favorite"></i>
@@ -54,31 +63,49 @@
     <transition name="mini">
       <div class="mini-player" v-show="!fullScreen" @click="show">
         <div class="mini-cd-box">
-          <img src="https://y.gtimg.cn/music/photo_new/T002R300x300M000000QgFcm0v8WaF.jpg?max_age=2592000" ref="miniCd" alt="">
+          <img :src="currentSong.image" ref="miniCd" alt="">
         </div>
         <div class="text">
-          <h3 class="song-name">意外</h3>
-          <p class="song-singer">薛之谦</p>
+          <h3 class="song-name" v-html="currentSong.songname"></h3>
+          <p class="song-singer" v-html="currentSong.singer"></p>
         </div>
         <div class="control">
-          <i class="icon-play-mini"></i>
+          <i :class="miniPlayIcon" @click.stop="togglePlaying"></i>
         </div>
         <div class="control">
           <i class="icon-playlist"></i>
         </div>
       </div>
     </transition>
+
+    <audio :src="currentSong.url" ref="audio" @canplay="ready" @error="error" @timeupdate="timeUpDate" @ended="ended"></audio>
   </div>
 </template>
 
 <script>
-  import {mapGetters, mapMutations} from "vuex";
-  import {SET_FULL_SCREEN} from "../../../store/mutations-types.js";
+  import ProgressBar from "../progress-bar/ProgressBar.vue";
+
+  import {mapGetters, mapMutations, mapActions} from "vuex";
+  import {SET_FULL_SCREEN, SET_PLAYING, SET_CURRENT_INDEX, SET_PLAY_MODE} from "../../../store/mutations-types.js";
+
+  import * as modes from "../../../common/js/modes.js";
+  import {shuffle} from "../../../common/js/utils.js";
 
   import animations from "create-keyframe-animation";
+  import LyricParser from "lyric-parser";
 
   export default {
     name: "Player",
+    data() {
+      return {
+        songReady: false,
+        currentTime: 0,
+        durationTime: 0
+      }
+    },
+    components: {
+      ProgressBar
+    },
     methods: {
       hide() {
         this.setFullScreen(false);
@@ -143,18 +170,146 @@
         }
 
       },
+      ready() {
+        this.songReady = true;
+      },
+      error() {
+        this.songReady = true;
+      },
+      play() {
+        this.$refs.audio.play();
+      },
+      pause() {
+        this.$refs.audio.pause();
+      },
+      togglePlaying() {
+        if(!this.songReady) return;
+        this.setPlaying(!this.playing);
+      },
+      prev() {
+        if(!this.songReady) return;
+        if(this.currentIndex === 0) {
+          this.setCurrentIndex(this.playList.length - 1);
+        }else {
+          this.setCurrentIndex(this.currentIndex - 1);
+        }
+        this.setPlaying(true);
+      },
+      next() {
+        if(!this.songReady) return;
+        if(this.currentIndex === this.playList.length - 1) {
+          this.setCurrentIndex(0);
+        }else {
+          this.setCurrentIndex(this.currentIndex + 1);
+        }
+        this.setPlaying(true);
+      },
+      timeUpDate() {  // 当歌曲的当前播放时长发生变化时触发
+        this.currentTime = this.$refs.audio.currentTime;
+      },
+      progressChange(ratio) {  // 当点击或者拖动进度条时 进度条组件向外导出的事件 携带当前的比例
+        const currentTime = this.durationTime * ratio;
+        this.$refs.audio.currentTime = currentTime;
+        this.setPlaying(true);
+      },
+      changeMode() {
+        let mode = this.playMode + 1;
+        mode = mode % 3;
+        this.setPlayMode(mode);
+        if(mode === modes.random) {
+          const randomList = shuffle(this.sequenceList);
+          this.modeChange({list: randomList, currentSong: this.currentSong});
+        }else if(mode === modes.sequence) {
+          this.modeChange({list: this.sequenceList, currentSong: this.currentSong});
+        }
+
+      },
+      ended() {
+        if(this.playMode === modes.loop) {
+          this.$refs.audio.currentTime = 0;
+          this.play();
+          return;
+        }
+        this.next();
+      },
+      _getLyric() {
+        this.currentSong.getLyric().then(lyric => {
+          this._showLyric(lyric)
+        })
+      },
+      _showLyric(lyric) {
+        this.lyricParser = new LyricParser(lyric, this._lyricHandle);
+        this.lyricParser.play();
+        console.log(this.lyricParser);
+      },
+      _lyricHandle({lineNum, txt}) {
+        console.log(lineNum, txt);
+      },
       ...mapMutations({
-        setFullScreen: SET_FULL_SCREEN
-      })
+        setFullScreen: SET_FULL_SCREEN,
+        setPlaying: SET_PLAYING,
+        setCurrentIndex: SET_CURRENT_INDEX,
+        setPlayMode: SET_PLAY_MODE
+      }),
+      ...mapActions([
+        "addSongList",
+        "modeChange"
+      ])
     },
     computed: {
       playerIsShow() {
         return this.playList.length > 0;
       },
+      playIcon() {
+        return this.playing ? "icon-pause" : "icon-play";
+      },
+      miniPlayIcon() {
+        return this.playing ? "icon-pause-mini" : "icon-play-mini";
+      },
+      rotatePlay() {
+        return this.playing ? "play-animation" : "play-animation pause";
+      },
+      modeIcon() {
+        return this.playMode === modes.sequence ? "icon-sequence" : this.playMode === modes.loop ? "icon-loop" : "icon-random";
+      },
       ...mapGetters([
         "playList",
-        "fullScreen"
+        "fullScreen",
+        "currentSong",
+        "playing",
+        "currentIndex",
+        "playMode",
+        "sequenceList"
       ])
+    },
+    filters: {
+      secondToMinute(second) {
+        second = parseInt(second);
+        let m = Math.floor(second / 60);
+        let s = second % 60 > 9 ? second % 60 : "0" + second % 60;
+
+        return `${m}:${s}`;
+      },
+    },
+    watch: {
+      playing() {  // 用于控制点击播放按钮时歌曲的播放和暂停
+        if(this.playing) {
+          this.songReady && this.play();
+        }else {
+          this.pause();
+        }
+      },
+      songReady(newVal) {  // 当歌曲的ready状态改变时 判断当前ready状态和播放状态是否为true  如果是 那么则播放
+        if(newVal && this.playing) {
+          this.play();
+        }
+      },
+      currentSong(newVal, oldVal) {  // 当切换歌曲时 先让歌曲的ready状态变为false 这样当切换的歌曲ready时 就会触发watch的songReady的变化 让歌曲播放
+        if(newVal === oldVal) return;
+        this.songReady = false;
+        this.durationTime = this.currentSong.duration;
+        this._getLyric();
+      }
     }
   }
 </script>
@@ -177,6 +332,12 @@
     transition all 0.4s ease
   .mini-enter, .mini-leave-active
     opacity 0
+
+  @keyframes rotatePlay
+    from
+      transform rotate(0)
+    to
+      transform rotate(360deg)
 
   .player-wrapper
     .normal-player
@@ -236,9 +397,10 @@
           text-align center
           box-sizing border-box
           .cd-wrapper
+            position absolute
+            left 10%
             height 100%
             width 80%
-            margin 0 auto
             .cd-box
               height 100%
               width 100%
@@ -246,21 +408,54 @@
               box-sizing border-box
               border-radius 50%
               overflow hidden
+              &.play-animation
+                animation rotatePlay 20s linear infinite
+                &.pause
+                  animation-play-state paused
               img
                 width 100%
                 height 100%
+        .middle-r
+          width 100%
+          height 100%
+          position absolute
+          left 0
+          top 0
+          .lyric-box
+            width 80%
+            height 100%
+            margin 0 auto
+            overflow hidden
+            .content
+              width 100%
+              height 100%
+              .lyric-text
+                height 32px
+                line-height 32px
+                text-align center
+                font-size $font-size-medium
+                color $color-text-l
       .bottom
         position absolute
         bottom 50px
         width 100%
         .progress-wrapper
+          display flex
           width 80%
           height 30px
           margin 0 auto
+          padding 10px 0
           .now-t, .total-t
             display inline-block
             height 30px
+            width 30px
             line-height 30px
+            font-size $font-size-small-s
+          .total-t
+            text-align right
+          .progress-bar-box
+            flex 1
+            height 100%
         .control-wrapper
           width 100%
           height 40px
@@ -269,6 +464,9 @@
           div
             flex 1
             color $color-theme
+           .icon
+              &.disable
+                color $color-theme-d
           .left
             text-align right
             font-size 30px
@@ -279,6 +477,7 @@
           .right
             text-align left
             font-size 30px
+
     .mini-player
       position fixed
       left 0
