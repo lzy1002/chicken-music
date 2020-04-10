@@ -7,6 +7,8 @@ export default {
   playList: [],
   sequenceList: [],
   currentIndex: -1,
-  fullScreen: false
+  fullScreen: false,
+  disc: {},
+  rank: {}
 
 }

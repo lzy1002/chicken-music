@@ -34,3 +34,25 @@ export function getDiscList() {  // 获取推荐歌单列表
     params: data
   })
 }
+
+export function getDiscDetail(disstid) {
+  const url = "/api/discDetail";
+
+  const data = Object.assign({}, commonParams, {
+    disstid,
+    type: 1,
+    json: 1,
+    utf8: 1,
+    onlysong: 0,
+    platform: 'yqq',
+    hostUin: 0,
+    needNewCode: 0,
+    format: "json"
+  });
+
+  return request({
+    url,
+    params: data
+  })
+
+}

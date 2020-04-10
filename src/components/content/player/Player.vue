@@ -14,24 +14,31 @@
           <p class="singer-name" v-html="currentSong.singer"></p>
         </div>
 
-        <div class="middle">
-          <div class="middle-l">
+        <div class="middle" @touchstart="middleTouchStart" @touchmove="middleTouchMove" @touchend="middleTouchEnd">
+          <div class="middle-l" ref="middleL">
             <div class="cd-wrapper" ref="normalCd">
               <div class="cd-box" :class="rotatePlay">
                 <img :src="currentSong.image" alt="">
               </div>
             </div>
-          </div>
-          <div class="middle-r">
-            <div class="lyric-box">
-              <div class="content">
-                <p class="lyric-text"></p>
-              </div>
+            <div class="playing-lyric-box">
+              <div class="playing-lyric">{{txt}}</div>
             </div>
+          </div>
+          <div class="middle-r" ref="middleR">
+            <scroll class="lyric-box" ref="lyricBox" :data="lyricArr">
+              <div class="content">
+                <p class="lyric-text" ref="lyricText" :class="{active: lineNum === index}" v-for="(item, index) in lyricArr">{{item.txt}}</p>
+              </div>
+            </scroll>
           </div>
         </div>
 
         <div class="bottom">
+          <div class="dots-box">
+            <span class="dot" :class="{active: middleFlag === 'cd'}"></span>
+            <span class="dot" :class="{active: middleFlag === 'lyric'}"></span>
+          </div>
           <div class="progress-wrapper">
             <span class="now-t">{{currentTime | secondToMinute}}</span>
             <div class="progress-bar-box">
@@ -70,7 +77,9 @@
           <p class="song-singer" v-html="currentSong.singer"></p>
         </div>
         <div class="control">
-          <i :class="miniPlayIcon" @click.stop="togglePlaying"></i>
+          <progress-circle :radius="32" :duration-time="durationTime" :current-time="currentTime">
+            <i class="mini-control" :class="miniPlayIcon" @click.stop="togglePlaying"></i>
+          </progress-circle>
         </div>
         <div class="control">
           <i class="icon-playlist"></i>
@@ -84,6 +93,8 @@
 
 <script>
   import ProgressBar from "../progress-bar/ProgressBar.vue";
+  import Scroll from "../../common/scroll/Scroll.vue";
+  import ProgressCircle from "../progress-circle/ProgressCircle.vue";
 
   import {mapGetters, mapMutations, mapActions} from "vuex";
   import {SET_FULL_SCREEN, SET_PLAYING, SET_CURRENT_INDEX, SET_PLAY_MODE} from "../../../store/mutations-types.js";
@@ -100,11 +111,20 @@
       return {
         songReady: false,
         currentTime: 0,
-        durationTime: 0
+        durationTime: 0,
+        lyricArr: [],
+        middleFlag: "cd",
+        lineNum: 1,
+        txt: ""
       }
     },
+    created() {
+      this.touch = {};
+    },
     components: {
-      ProgressBar
+      ProgressBar,
+      Scroll,
+      ProgressCircle
     },
     methods: {
       hide() {
@@ -185,6 +205,7 @@
       togglePlaying() {
         if(!this.songReady) return;
         this.setPlaying(!this.playing);
+        this.lyricParser && this.lyricParser.togglePlay();
       },
       prev() {
         if(!this.songReady) return;
@@ -204,12 +225,18 @@
         }
         this.setPlaying(true);
       },
+      loop() {
+        this.$refs.audio.currentTime = 0;
+        this._seekLyric(0);
+        this.play();
+      },
       timeUpDate() {  // 当歌曲的当前播放时长发生变化时触发
         this.currentTime = this.$refs.audio.currentTime;
       },
       progressChange(ratio) {  // 当点击或者拖动进度条时 进度条组件向外导出的事件 携带当前的比例
         const currentTime = this.durationTime * ratio;
         this.$refs.audio.currentTime = currentTime;
+        this._seekLyric(currentTime * 1000);
         this.setPlaying(true);
       },
       changeMode() {
@@ -226,24 +253,70 @@
       },
       ended() {
         if(this.playMode === modes.loop) {
-          this.$refs.audio.currentTime = 0;
-          this.play();
+          this.loop();
           return;
         }
         this.next();
       },
       _getLyric() {
         this.currentSong.getLyric().then(lyric => {
-          this._showLyric(lyric)
+          this._showLyric(lyric);
         })
       },
       _showLyric(lyric) {
+        this._stopLyric();
         this.lyricParser = new LyricParser(lyric, this._lyricHandle);
-        this.lyricParser.play();
-        console.log(this.lyricParser);
+        this.lyricArr = this.lyricParser.lines;
+        this._playLyric();
       },
       _lyricHandle({lineNum, txt}) {
-        console.log(lineNum, txt);
+        this.lineNum = lineNum;
+        this.txt = txt;
+      },
+      _playLyric() {
+        this.lyricParser && this.lyricParser.play();
+      },
+      _stopLyric() {
+        this.lyricParser && this.lyricParser.stop();
+      },
+      _seekLyric(currentTime) {
+        this.lyricParser && this.lyricParser.seek(currentTime);
+      },
+      middleTouchStart(e) {
+        this.$refs.middleR.style.transition = "none";
+        this.$refs.middleL.style.transition = "none";
+        this.touch.ratio = 0;
+
+        this.touch.targetX = this.middleFlag === "cd" ? -window.innerWidth : 0;
+        this.touch.currentX = this.middleFlag === "cd" ? 0 : -window.innerWidth;
+        this.touch.targetOpacity = this.middleFlag === "cd" ? 0 : 1;
+        this.touch.currentOpacity = this.middleFlag === "cd" ? 1 : 0;
+        this.touch.startX = e.touches[0].pageX;
+      },
+      middleTouchMove(e) {
+        this.touch.diffX = e.touches[0].pageX - this.touch.startX;
+        let moveX = this.touch.currentX + this.touch.diffX;
+        moveX = Math.max(-window.innerWidth, Math.min(0, moveX));
+        this.$refs.middleR.style.transform = `translate3d(${moveX}px, 0, 0)`;
+        if((this.middleFlag === "cd" && this.touch.diffX < 0) || (this.middleFlag === "lyric" && this.touch.diffX > 0)) {
+          this.touch.ratio = Math.abs(this.touch.diffX) / window.innerWidth;
+        }
+        this.$refs.middleL.style.opacity = this.middleFlag === "cd" ? 1 - this.touch.ratio : this.touch.ratio;
+      },
+      middleTouchEnd() {
+        if(this.touch.ratio >= 0.3) {
+          this.$refs.middleR.style.transition = "all 0.4s ease";
+          this.$refs.middleR.style.transform = `translate3d(${this.touch.targetX}px, 0, 0)`;
+          this.$refs.middleL.style.transition = "all 0.4s ease";
+          this.$refs.middleL.style.opacity = this.touch.targetOpacity;
+          this.middleFlag = this.middleFlag === "cd" ? "lyric" : "cd";
+        }else {
+          this.$refs.middleR.style.transition = "all 0.4s ease";
+          this.$refs.middleR.style.transform = `translate3d(${this.touch.currentX}px, 0, 0)`;
+          this.$refs.middleL.style.transition = "all 0.4s ease";
+          this.$refs.middleL.style.opacity = this.touch.currentOpacity;
+        }
+
       },
       ...mapMutations({
         setFullScreen: SET_FULL_SCREEN,
@@ -308,7 +381,15 @@
         if(newVal === oldVal) return;
         this.songReady = false;
         this.durationTime = this.currentSong.duration;
+        this.$refs.lyricBox.scrollTo(0, 0, 100);
         this._getLyric();
+      },
+      lineNum(newVal) {
+        if(newVal < 5) {
+          return;
+        }
+        const currentLyric = this.$refs.lyricText[newVal - 5];
+        this.$refs.lyricBox.scrollToElement(currentLyric, 1000);
       }
     }
   }
@@ -393,11 +474,13 @@
         .middle-l
           position relative
           width 100%
-          padding-bottom 80%
+          height 0
+          padding-top 80%
           text-align center
           box-sizing border-box
           .cd-wrapper
             position absolute
+            top 0
             left 10%
             height 100%
             width 80%
@@ -415,30 +498,59 @@
               img
                 width 100%
                 height 100%
+          .playing-lyric-box
+            width 80%
+            height 20px
+            margin 30px auto 0
+            .playing-lyric
+              width 100%
+              height 20px
+              line-height 20px
+              text-align center
+              font-size $font-size-medium
+              color $color-text-l
         .middle-r
           width 100%
           height 100%
           position absolute
-          left 0
+          left 100%
           top 0
           .lyric-box
-            width 80%
+            width 100%
             height 100%
-            margin 0 auto
             overflow hidden
             .content
-              width 100%
-              height 100%
+              width 80%
+              margin 0 auto
               .lyric-text
                 height 32px
                 line-height 32px
                 text-align center
                 font-size $font-size-medium
                 color $color-text-l
+                overflow hidden
+                no-wrap()
+                &.active
+                  color #fff
       .bottom
         position absolute
         bottom 50px
         width 100%
+        .dots-box
+          width 100%
+          height 8px
+          text-align center
+          .dot
+            display inline-block
+            width 8px
+            height 8px
+            margin 0 4px
+            border-radius 50%
+            background-color $color-text-l
+            &.active
+              width 20px
+              border-radius 10px
+              background-color $color-text-ll
         .progress-wrapper
           display flex
           width 80%
@@ -507,6 +619,10 @@
         font-size 32px
         color $color-theme-d
         padding 0 10px
+        .mini-control
+          position absolute
+          top 0
+          left 0
         .icon-playlist
           font-size 30px
 </style>

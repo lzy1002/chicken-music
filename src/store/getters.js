@@ -13,3 +13,7 @@ export const currentIndex = (state) => state.currentIndex;
 export const fullScreen = (state) => state.fullScreen;
 
 export const currentSong = (state) => state.playList[state.currentIndex] || {};
+
+export const disc = (state) => state.disc;
+
+export const rank = (state) => state.rank;

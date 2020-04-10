@@ -15,7 +15,7 @@
 
     <div class="mask" ref="mask"></div>
     <scroll class="list-box" :data="list" :listen-scroll="listenScroll" @scroll="scroll" ref="listBox">
-      <song-list :song-list="list" @select="selectItem"></song-list>
+      <song-list :song-list="list" @select="selectItem" :rankFlag="rankFlag"></song-list>
       <div class="loading-box" v-if="!list.length">
         <loading></loading>
       </div>
@@ -26,15 +26,17 @@
 <script>
   import Scroll from "../../../components/common/scroll/Scroll.vue";
   import Loading from "../../../components/common/loading/Loading.vue";
-
   import SongList from "../song-list/SongList.vue";
 
   import {mapActions} from "vuex";
+
+  import {playerMixin} from "../../../common/js/mixins.js";
 
   const TITLE_HEIGHT = 40;
 
   export default {
     name: "MusicList",
+    mixins: [playerMixin],
     props: {
       data: {  // 歌手或歌单的一些信息 从vuex中读取传递到这里
         type: Object,
@@ -47,6 +49,10 @@
         default() {
           return []
         }
+      },
+      rankFlag: {
+        type: Boolean,
+        default: false
       }
     },
     data() {
@@ -79,6 +85,13 @@
             index: index
           });
       },
+      handlePlayerBottom() {
+        window.setTimeout(_ => {
+          const bottom = this.playList.length > 0 ? 60 : 0;
+          this.$refs.listBox.$el.style.bottom = bottom + "px";
+          this.$refs.listBox.refresh();
+        }, 20);
+      },
       ...mapActions([
         "addSongList"
       ])
@@ -88,7 +101,7 @@
         return this.data.name;
       },
       avatar() {
-        return `background-image: url(${this.data.avatar})`
+        return `background-image: url(${this.data.avatar})`;
       }
     },
     components: {
@@ -157,7 +170,7 @@
       position absolute
       left 50%
       top 0
-      width 60%
+      width 80%
       height 40px
       line-height 40px
       text-align center

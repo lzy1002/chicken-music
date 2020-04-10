@@ -1,6 +1,6 @@
 <template>
-  <div class="singer-wrapper">
-    <scroll class="singer-scroll" :data="singerList" :listen-scroll="listenScroll" @scroll="scroll" ref="singerWrapper">
+  <div class="singer-wrapper" ref="singerWrapper">
+    <scroll class="singer-scroll" :data="singerList" :listen-scroll="listenScroll" @scroll="scroll" ref="singerScroll">
       <ul class="title-box">
         <li class="title-item" v-for="item in singerList" ref="titleItem">
           <h1 class="title">{{item.title}}</h1>
@@ -35,16 +35,19 @@
   import {SET_SINGER} from "../../store/mutations-types.js";
 
   import {getSingerList} from "../../api/singer.js";
+  import {ERR_OK} from "../../api/config.js";
+
   import {Singer} from "../../common/js/singer.js";
   import {attr} from "../../common/js/dom.js";
 
-  import {ERR_OK} from "../../api/config.js";
+  import {playerMixin} from "../../common/js/mixins.js";
 
   const NAV_ITEM_HEIGHT = 18;
   const FIXED_TITLE_HEIGHT = 30;
 
   export default {
     name: "Singer",
+    mixins: [playerMixin],
     data() {
       return {
         listenScroll: true,
@@ -140,12 +143,19 @@
       },
       _scrollToElement(index) {
         let currentElement = this.$refs.titleItem[index];
-        this.$refs.singerWrapper.scrollToElement(currentElement, 0);
+        this.$refs.singerScroll.scrollToElement(currentElement, 0);
       },
       toDetail(singerData) {
         console.log(singerData);
         this.setSinger(singerData);
         this.$router.push(`/singer/${singerData.mid}`);
+      },
+      handlePlayerBottom() {
+        window.setTimeout(_ => {
+          const bottom = this.playList.length > 0 ? 60 : 0;
+          this.$refs.singerWrapper.style.bottom = bottom + "px";
+          this.$refs.singerScroll.refresh();
+        }, 20);
       },
       ...mapMutations({
         setSinger: SET_SINGER
