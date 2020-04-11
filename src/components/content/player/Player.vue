@@ -70,7 +70,7 @@
     <transition name="mini">
       <div class="mini-player" v-show="!fullScreen" @click="show">
         <div class="mini-cd-box">
-          <img :src="currentSong.image" ref="miniCd" alt="">
+          <img :src="currentSong.image" class="mini-cd" :class="rotatePlay" ref="miniCd" alt="">
         </div>
         <div class="text">
           <h3 class="song-name" v-html="currentSong.songname"></h3>
@@ -604,9 +604,13 @@
         width 40px
         height 40px
         padding 0 10px 0 20px
-        img
+        .mini-cd
           width 100%
           border-radius 50%
+          &.play-animation
+            animation rotatePlay 20s linear infinite
+            &.pause
+              animation-play-state paused
       .text
         flex 1
         line-height 20px

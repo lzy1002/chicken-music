@@ -48,6 +48,8 @@
   import {mapMutations} from "vuex";
   import {SET_DISC} from "../../store/mutations-types.js";
 
+  import {Disc} from "../../common/js/disc.js";
+
   import {playerMixin} from "../../common/js/mixins.js";
 
   export default {
@@ -84,7 +86,7 @@
         })
       },
       discItemClick(discItem) {
-        this.setDisc({name: discItem.dissname, avatar: discItem.imgurl, id: discItem.dissid});
+        this.setDisc(new Disc(discItem));
         this.$router.push(`/recommend/${discItem.dissid}`);
       },
       handlePlayerBottom() {

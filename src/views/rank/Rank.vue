@@ -31,6 +31,8 @@
   import {mapMutations} from "vuex";
   import {SET_RANK} from "../../store/mutations-types.js";
 
+  import {Rank} from "../../common/js/rank.js";
+
   import {playerMixin} from "../../common/js/mixins.js";
 
   export default {
@@ -57,7 +59,7 @@
         return `${songname}-${singername}`;
       },
       rankItemClick(rankItem) {
-        this.setRank({name: rankItem.topTitle, avatar: rankItem.picUrl, id: rankItem.id});
+        this.setRank(new Rank(rankItem));
         this.$router.push(`/rank/${rankItem.id}`);
       },
       handlePlayerBottom() {

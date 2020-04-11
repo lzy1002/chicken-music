@@ -27,6 +27,10 @@
       probeType: {
         type: Number,
         default: 3
+      },
+      pullUpLoad: {
+        type: Boolean,
+        default: true
       }
     },
     mounted() {
@@ -38,12 +42,20 @@
       _initScroll() {
         this.scroll = new BScroll(this.$refs.wrapper, {
           click: this.click,
-          probeType: this.probeType
+          probeType: this.probeType,
+          pullUpLoad: this.pullUpLoad
         });
 
         if(this.listenScroll) {
           this.scroll.on("scroll", pos => {
             this.$emit("scroll", pos);
+          })
+        }
+
+        if(this.pullUpLoad) {
+          this.scroll.on("pullingUp", () => {
+            this.$emit("pullUp");
+            this.scroll.finishPullUp();
           })
         }
 

@@ -85,17 +85,17 @@
 
         list.forEach((item, index) => {
           if(index < 10) {
-            singer.hot.list.push(new Singer(item));
+            singer.hot.list.push(new Singer({mid: item.Fsinger_mid, name: item.Fsinger_name}));
           }
 
           let Findex = item.Findex;
 
           if(singer[Findex] !== undefined) {
-            singer[Findex].list.push(new Singer(item));
+            singer[Findex].list.push(new Singer({mid: item.Fsinger_mid, name: item.Fsinger_name}));
           }else if(singer[Findex] === undefined && /[a-zA-z]/.test(Findex)) {
             singer[Findex] = {
               title: Findex,
-              list:[new Singer(item)]
+              list:[new Singer({mid: item.Fsinger_mid, name: item.Fsinger_name})]
             }
           }
         });

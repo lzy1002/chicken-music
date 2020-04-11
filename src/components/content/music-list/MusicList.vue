@@ -7,7 +7,7 @@
 
     <div class="avatar-box" :style="avatar" ref="avatarBox">
       <div class="filter" ref="filter"></div>
-      <div class="play-box" ref="playBox">
+      <div class="play-box" ref="playBox" @click="randomPlay">
         <i class="icon-play"></i>
         <span class="text">随机播放全部</span>
       </div>
@@ -85,6 +85,9 @@
             index: index
           });
       },
+      randomPlay() {
+        this.addRandomList({list: this.list});
+      },
       handlePlayerBottom() {
         window.setTimeout(_ => {
           const bottom = this.playList.length > 0 ? 60 : 0;
@@ -93,7 +96,8 @@
         }, 20);
       },
       ...mapActions([
-        "addSongList"
+        "addSongList",
+        "addRandomList"
       ])
     },
     computed: {

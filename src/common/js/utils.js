@@ -12,3 +12,15 @@ export function shuffle(arr) {
   }
   return _arr;
 }
+
+export function debounce(fn, delay) {
+  let timeId;
+
+  return function (...args) {
+    window.clearTimeout(timeId);
+    timeId = window.setTimeout(_ => {
+      fn && fn.apply(null, args);
+    }, delay);
+  }
+
+}
