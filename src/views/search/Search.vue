@@ -2,8 +2,8 @@
   <div class="search-wrapper">
     <search-box :placeholder="placeholder" @search="search" ref="searchBox"></search-box>
 
-    <div class="shortcut-box" v-show="!searchVal">
-      <div class="shortcut">
+    <div class="shortcut-box" ref="shortcutBox" v-show="!searchVal">
+      <scroll class="shortcut" ref="shortcutScroll" :data="searchHistory">
         <div class="content">
           <div class="hot-box">
             <h1 class="title">热门搜索</h1>
@@ -12,24 +12,26 @@
             </ul>
           </div>
 
-          <div class="history-box">
+          <div class="history-box" v-show="showHistoryBox">
             <h1 class="title">
               <span class="text">搜索历史</span>
-              <span class="clear">
+              <span class="clear" @click="showConfirm">
                 <i class="icon-clear"></i>
               </span>
             </h1>
             <div class="history-list-box">
-
+              <history-list :search-history="searchHistory" @searchItem="searchItem"></history-list>
             </div>
           </div>
         </div>
-      </div>
+      </scroll>
     </div>
 
     <div class="result-box" v-show="searchVal">
-      <suggest :search-val="searchVal" @toSinger="toSinger"></suggest>
+      <suggest :search-val="searchVal"></suggest>
     </div>
+
+    <confirm ref="confirm" :text="confirmText" :right="confirmRight" @rightClick="clearHistory"></confirm>
 
     <transition name="move">
       <router-view></router-view>
@@ -39,28 +41,37 @@
 </template>
 
 <script>
+  import Scroll from "../../components/common/scroll/Scroll.vue";
   import SearchBox from "../../components/common/search-box/SearchBox.vue";
+  import Confirm from "../../components/common/confirm/Confirm.vue";
   import Suggest from "../../components/content/suggest/Suggest.vue";
+  import HistoryList from "../../components/content/history-list/HistoryList.vue";
 
   import {getHotData} from "../../api/search.js";
   import {ERR_OK} from "../../api/config.js";
-  import {Singer} from "../../common/js/singer.js";
 
-  import {mapMutations} from "vuex";
-  import {SET_SINGER} from "../../store/mutations-types.js";
+  import {mapActions, mapGetters} from "vuex";
+
+  import {playerMixin} from "../../common/js/mixins.js";
 
   export default {
     name: "Search",
+    mixins: [playerMixin],
     data() {
       return {
         hotList: [],
         placeholder: "搜索歌曲、歌手",
-        searchVal: ""
+        searchVal: "",
+        confirmText: "清空搜索历史",
+        confirmRight: "清空"
       }
     },
     components: {
+      Scroll,
       SearchBox,
-      Suggest
+      Confirm,
+      Suggest,
+      HistoryList
     },
     created() {
       this._getHotData();
@@ -80,13 +91,42 @@
       hotClick(key) {
         this.$refs.searchBox.set(key);
       },
-      toSinger(singer) {
-        this.setSinger(new Singer({name: singer.name, mid: singer.mid}));
-        this.$router.push(`/search/${singer.mid}`);
+      showConfirm() {
+        this.$refs.confirm.show();
       },
-      ...mapMutations({
-        setSinger: SET_SINGER
-      })
+      searchItem(key) {
+        this.$refs.searchBox.set(key);
+      },
+      clearHistory() {
+        this.clearSearchHistory();
+      },
+      handlePlayerBottom() {
+        window.setTimeout(_ => {
+          const bottom = this.playList.length > 0 ? 60 : 0;
+          this.$refs.shortcutBox.style.bottom = bottom + "px";
+          this.$refs.shortcutScroll.refresh();
+        }, 20);
+      },
+      ...mapActions([
+        "clearSearchHistory"
+      ])
+    },
+    computed: {
+      showHistoryBox() {
+        return this.searchHistory.length > 0;
+      },
+      ...mapGetters([
+        "searchHistory"
+      ])
+    },
+    watch: {
+      searchVal(newVal) {
+        if(newVal === "") {
+          window.setTimeout(_ => {
+            this.$refs.shortcutScroll.refresh();
+          }, 20);
+        }
+      }
     }
   }
 </script>
@@ -116,6 +156,7 @@
       .shortcut
         width 100%
         height 100%
+        overflow hidden
         .content
           .hot-box
             font-size $font-size-medium

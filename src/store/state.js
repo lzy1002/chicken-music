@@ -1,5 +1,7 @@
 import * as modes from "../common/js/modes.js";
 
+import {loadSearchHistory} from "../common/js/cache.js";
+
 export default {
   singer: {},
   playing: false,
@@ -9,6 +11,7 @@ export default {
   currentIndex: -1,
   fullScreen: false,
   disc: {},
-  rank: {}
+  rank: {},
+  searchHistory: loadSearchHistory()
 
 }

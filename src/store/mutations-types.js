@@ -15,3 +15,5 @@ export const SET_FULL_SCREEN = "SET_FULL_SCREEN";
 export const SET_DISC = "SET_DISC";
 
 export const SET_RANK = "SET_RANK";
+
+export const SET_SEARCH_HISTORY = "SET_SEARCH_HISTORY";

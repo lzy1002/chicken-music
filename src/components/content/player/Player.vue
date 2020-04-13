@@ -82,8 +82,10 @@
           </progress-circle>
         </div>
         <div class="control">
-          <i class="icon-playlist"></i>
+          <i class="icon-playlist" @click.stop="showPlayList"></i>
         </div>
+
+        <play-list ref="playList"></play-list>
       </div>
     </transition>
 
@@ -95,18 +97,21 @@
   import ProgressBar from "../progress-bar/ProgressBar.vue";
   import Scroll from "../../common/scroll/Scroll.vue";
   import ProgressCircle from "../progress-circle/ProgressCircle.vue";
+  import PlayList from "../play-list/PlayList.vue";
 
   import {mapGetters, mapMutations, mapActions} from "vuex";
   import {SET_FULL_SCREEN, SET_PLAYING, SET_CURRENT_INDEX, SET_PLAY_MODE} from "../../../store/mutations-types.js";
 
   import * as modes from "../../../common/js/modes.js";
-  import {shuffle} from "../../../common/js/utils.js";
+
+  import {modeMixin} from "../../../common/js/mixins.js";
 
   import animations from "create-keyframe-animation";
   import LyricParser from "lyric-parser";
 
   export default {
     name: "Player",
+    mixins: [modeMixin],
     data() {
       return {
         songReady: false,
@@ -124,7 +129,8 @@
     components: {
       ProgressBar,
       Scroll,
-      ProgressCircle
+      ProgressCircle,
+      PlayList
     },
     methods: {
       hide() {
@@ -209,6 +215,13 @@
       },
       prev() {
         if(!this.songReady) return;
+        if(this.playList.length === 1) {
+          this.$refs.audio.currentTime = 0;
+          this._seekLyric(0);
+          this.$refs.lyricBox.scrollTo(0, 0, 100);
+          this.setPlaying(true);
+          return;
+        }
         if(this.currentIndex === 0) {
           this.setCurrentIndex(this.playList.length - 1);
         }else {
@@ -218,6 +231,13 @@
       },
       next() {
         if(!this.songReady) return;
+        if(this.playList.length === 1) {
+          this.$refs.audio.currentTime = 0;
+          this._seekLyric(0);
+          this.$refs.lyricBox.scrollTo(0, 0, 100);
+          this.setPlaying(true);
+          return;
+        }
         if(this.currentIndex === this.playList.length - 1) {
           this.setCurrentIndex(0);
         }else {
@@ -238,18 +258,6 @@
         this.$refs.audio.currentTime = currentTime;
         this._seekLyric(currentTime * 1000);
         this.setPlaying(true);
-      },
-      changeMode() {
-        let mode = this.playMode + 1;
-        mode = mode % 3;
-        this.setPlayMode(mode);
-        if(mode === modes.random) {
-          const randomList = shuffle(this.sequenceList);
-          this.modeChange({list: randomList, currentSong: this.currentSong});
-        }else if(mode === modes.sequence) {
-          this.modeChange({list: this.sequenceList, currentSong: this.currentSong});
-        }
-
       },
       ended() {
         if(this.playMode === modes.loop) {
@@ -318,15 +326,16 @@
         }
 
       },
+      showPlayList() {
+        this.$refs.playList.show();
+      },
       ...mapMutations({
         setFullScreen: SET_FULL_SCREEN,
         setPlaying: SET_PLAYING,
-        setCurrentIndex: SET_CURRENT_INDEX,
-        setPlayMode: SET_PLAY_MODE
+        setCurrentIndex: SET_CURRENT_INDEX
       }),
       ...mapActions([
-        "addSongList",
-        "modeChange"
+        "addSongList"
       ])
     },
     computed: {
@@ -342,17 +351,13 @@
       rotatePlay() {
         return this.playing ? "play-animation" : "play-animation pause";
       },
-      modeIcon() {
-        return this.playMode === modes.sequence ? "icon-sequence" : this.playMode === modes.loop ? "icon-loop" : "icon-random";
-      },
       ...mapGetters([
         "playList",
         "fullScreen",
         "currentSong",
         "playing",
         "currentIndex",
-        "playMode",
-        "sequenceList"
+        "playMode"
       ])
     },
     filters: {
@@ -397,6 +402,7 @@
 
 <style lang="stylus" scoped>
   @import "../../../common/stylus/variable.styl"
+  @import "../../../common/stylus/mixin.styl"
 
   .normal-enter-active, .normal-leave-active
     transition all 0.4s ease
@@ -462,10 +468,12 @@
           text-align center
           margin 0 auto
           font-size $font-size-large
+          no-wrap()
         .singer-name
           text-align center
           font-size $font-size-medium
           line-height 20px
+          no-wrap()
       .middle
         position fixed
         top 80px
@@ -614,6 +622,7 @@
       .text
         flex 1
         line-height 20px
+        no-wrap()
         .song-name
           font-size $font-size-medium
         .song-singer

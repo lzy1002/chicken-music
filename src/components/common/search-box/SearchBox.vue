@@ -33,7 +33,6 @@
       }
     },
     mounted() {
-
       this.$watch("search", debounce((newVal) => {
         this.$emit("search", newVal);
       }, 100));

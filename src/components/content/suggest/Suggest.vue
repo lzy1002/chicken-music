@@ -12,10 +12,10 @@
           <loading text=""></loading>
         </div>
       </ul>
-      <div class="no-result-box" v-show="showNoResult">
-        <no-result></no-result>
-      </div>
     </scroll>
+    <div class="no-result-box" v-show="showNoResult">
+      <no-result></no-result>
+    </div>
   </div>
 </template>
 
@@ -32,6 +32,9 @@
   import {createSong} from "../../../common/js/song.js";
 
   import {playerMixin} from "../../../common/js/mixins.js";
+
+  import {mapMutations, mapActions} from "vuex";
+  import {SET_SINGER} from "../../../store/mutations-types.js";
 
   export default {
     name: "Suggest",
@@ -96,7 +99,7 @@
         })
       },
       _checkLoadMore(songs) {
-        if(this.page * this.perpage > this.totalNum && songs.length <= 0) {
+        if(this.page * this.perpage >= this.totalNum && songs.length <= 0) {
           this.moreFlag = false;
         }
       },
@@ -118,7 +121,11 @@
       },
       resultItemClick(item) {
         if(item.type === "singer") {
-          this.$emit("toSinger", item);
+          this.setSinger(new Singer({name: item.name, mid: item.mid}));
+          this.$router.push(`/search/${item.mid}`);
+        }else {
+          this.insertSong({song: item});
+          this.addSearchHistory({history: this.searchVal});
         }
       },
       handlePlayerBottom() {
@@ -127,7 +134,14 @@
           this.$refs.suggestWrapper.style.bottom = bottom + "px";
           this.$refs.suggestScroll.refresh();
         }, 20);
-      }
+      },
+      ...mapMutations({
+        setSinger: SET_SINGER
+      }),
+      ...mapActions([
+        "insertSong",
+        "addSearchHistory"
+      ])
     },
     computed: {
       showNoResult() {
@@ -180,11 +194,11 @@
             height 16px
           .text
             no-wrap()
-      .no-result-box
-        width 100%
-        position absolute
-        top 50%
-        left 0
-        transform translate3d(0, -50%, 0)
+    .no-result-box
+      width 100%
+      position absolute
+      top 50%
+      left 0
+      transform translate3d(0, -50%, 0)
 
 </style>
