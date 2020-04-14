@@ -27,8 +27,8 @@
       </scroll>
     </div>
 
-    <div class="result-box" v-show="searchVal">
-      <suggest :search-val="searchVal"></suggest>
+    <div class="result-box" ref="resultBox" v-show="searchVal">
+      <suggest ref="suggest" :search-val="searchVal"></suggest>
     </div>
 
     <confirm ref="confirm" :text="confirmText" :right="confirmRight" @rightClick="clearHistory"></confirm>
@@ -104,7 +104,9 @@
         window.setTimeout(_ => {
           const bottom = this.playList.length > 0 ? 60 : 0;
           this.$refs.shortcutBox.style.bottom = bottom + "px";
+          this.$refs.resultBox.style.bottom = bottom + "px";
           this.$refs.shortcutScroll.refresh();
+          this.$refs.suggest.refresh();
         }, 20);
       },
       ...mapActions([

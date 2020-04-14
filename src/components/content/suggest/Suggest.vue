@@ -31,14 +31,11 @@
   import {Singer} from "../../../common/js/singer.js";
   import {createSong} from "../../../common/js/song.js";
 
-  import {playerMixin} from "../../../common/js/mixins.js";
-
   import {mapMutations, mapActions} from "vuex";
   import {SET_SINGER} from "../../../store/mutations-types.js";
 
   export default {
     name: "Suggest",
-    mixins: [playerMixin],
     props: {
       searchVal: {
         type: String,
@@ -128,12 +125,8 @@
           this.addSearchHistory({history: this.searchVal});
         }
       },
-      handlePlayerBottom() {
-        window.setTimeout(_ => {
-          const bottom = this.playList.length > 0 ? 60 : 0;
-          this.$refs.suggestWrapper.style.bottom = bottom + "px";
-          this.$refs.suggestScroll.refresh();
-        }, 20);
+      refresh() {
+        this.$refs.suggestScroll.refresh();
       },
       ...mapMutations({
         setSinger: SET_SINGER
@@ -178,6 +171,7 @@
     left 0
     right 0
     bottom 0
+    overflow hidden
     .suggest-scroll
       width 100%
       height 100%

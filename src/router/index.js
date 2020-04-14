@@ -10,6 +10,7 @@ const SingerDetail = () => import("../views/singer-detail/SingerDetail.vue");
 const Rank = () => import("../views/rank/Rank.vue");
 const RankDetail = () => import("../views/rank-detail/RankDetail.vue");
 const Search = () => import("../views/search/Search.vue");
+const User = () => import("../views/user/User.vue");
 
 const routes = [
   {path: "/", redirect: "/recommend"},
@@ -29,7 +30,8 @@ const routes = [
   {path: "/search", component: Search,
     children: [
       {path: ":id", component: SingerDetail}
-    ]}
+    ]},
+  {path: "/user", component: User}
 ];
 
 const router = new VueRouter({

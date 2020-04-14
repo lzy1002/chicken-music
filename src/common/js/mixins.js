@@ -60,3 +60,30 @@ export const modeMixin = {
   }
 
 };
+
+export const favoriteMixin = {
+  methods: {
+    favoriteIcon(song) {
+      const index = this.favoriteList.findIndex(item => item.songid === song.songid);
+      return index === -1 ? "icon-not-favorite" : "icon-favorite";
+    },
+    favoriteItem(song) {
+      const index = this.favoriteList.findIndex(item => item.songid === song.songid);
+      if(index === -1) {
+        this.addFavoriteList({song});
+      }else {
+        this.removeFavoriteList({song});
+      }
+    },
+    ...mapActions([
+      "addFavoriteList",
+      "removeFavoriteList"
+    ])
+  },
+  computed: {
+    ...mapGetters([
+      "favoriteList"
+    ])
+  }
+
+};

@@ -2,12 +2,20 @@
   <div class="header-wrapper">
     <div class="icon"></div>
     <h1 class="title">Chicken Music</h1>
+    <div class="user" @click="toUser">
+      <i class="icon-mine"></i>
+    </div>
   </div>
 </template>
 
 <script>
   export default {
-    name: "TopHeader"
+    name: "TopHeader",
+    methods: {
+      toUser() {
+        this.$router.push("/user");
+      }
+    }
   }
 </script>
 
@@ -16,6 +24,7 @@
   @import "../../../common/stylus/variable.styl"
 
   .header-wrapper
+    position relative
     width 100%
     height 44px
     text-align center
@@ -35,4 +44,13 @@
       vertical-align top
       font-size $font-size-large
       color $color-theme
+    .user
+      position absolute
+      top 0
+      right 0
+      font-size 20px
+      color $color-theme
+      .icon-mine
+        display block
+        padding 12px
 </style>

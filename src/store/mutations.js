@@ -30,5 +30,12 @@ export default {
   },
   [types.SET_SEARCH_HISTORY](state, history) {
     state.searchHistory = history;
+  },
+  [types.SET_FAVORITE_LIST](state, favoriteList) {
+    state.favoriteList = favoriteList;
+  },
+  [types.SET_LATELY_PLAY](state, latelyPlay) {
+    state.latelyPlay = latelyPlay;
   }
 }
+

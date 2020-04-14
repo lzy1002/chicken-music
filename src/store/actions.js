@@ -3,7 +3,7 @@ import * as modes from "../common/js/modes.js";
 
 import {shuffle} from "../common/js/utils.js";
 
-import {addHistory, clearHistory, removeHistory} from "../common/js/cache.js";
+import {addHistory, clearHistory, removeHistory, addFavorite, removeFavorite, addLately} from "../common/js/cache.js";
 
 function findSongIndex(list, fn) {
   return list.findIndex(fn);
@@ -77,6 +77,33 @@ export const insertSong = ({commit, state}, {song}) => {
 
 };
 
+export const deleteSong = ({commit, state}, {song, index}) => {
+  let playList = state.playList.slice();
+  let sequenceList = state.sequenceList.slice();
+  let playListIndex = findSongIndex(playList, item => item.songid === song.songid);
+  let sequenceListIndex = findSongIndex(sequenceList, item => item.songid === song.songid);
+
+  playList.splice(playListIndex, 1);
+  sequenceList.splice(sequenceListIndex, 1);
+
+  if(playListIndex < state.currentIndex) {
+    commit(types.SET_CURRENT_INDEX, state.currentIndex - 1);
+  }
+
+  commit(types.SET_PLAY_LIST, playList);
+  commit(types.SET_SEQUENCE_LIST, sequenceList);
+
+};
+
+export const clearSong = ({commit}) => {
+  commit(types.SET_PLAY_LIST, []);
+  commit(types.SET_SEQUENCE_LIST, []);
+  commit(types.SET_CURRENT_INDEX, -1);
+  commit(types.SET_PLAYING, false);
+  commit(types.SET_FULL_SCREEN, false);
+
+};
+
 export const addSearchHistory = ({commit}, {history}) => {
   commit(types.SET_SEARCH_HISTORY, addHistory(history));
 };
@@ -87,4 +114,16 @@ export const clearSearchHistory = ({commit}) => {
 
 export const removeSearchHistory = ({commit}, {history}) => {
   commit(types.SET_SEARCH_HISTORY, removeHistory(history));
+};
+
+export const addFavoriteList = ({commit}, {song}) => {
+  commit(types.SET_FAVORITE_LIST, addFavorite(song));
+};
+
+export const removeFavoriteList = ({commit}, {song}) => {
+  commit(types.SET_FAVORITE_LIST, removeFavorite(song));
+};
+
+export const addLatelyPlay = ({commit}, {song}) => {
+  commit(types.SET_LATELY_PLAY, addLately(song));
 };

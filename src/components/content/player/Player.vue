@@ -60,7 +60,7 @@
               <i class="icon icon-next" :class="{disable: !songReady}" @click="next"></i>
             </div>
             <div class="right">
-              <i class="icon-not-favorite"></i>
+              <i :class="favoriteIcon(currentSong)" @click="favoriteItem(currentSong)"></i>
             </div>
           </div>
         </div>
@@ -100,18 +100,18 @@
   import PlayList from "../play-list/PlayList.vue";
 
   import {mapGetters, mapMutations, mapActions} from "vuex";
-  import {SET_FULL_SCREEN, SET_PLAYING, SET_CURRENT_INDEX, SET_PLAY_MODE} from "../../../store/mutations-types.js";
+  import {SET_FULL_SCREEN, SET_PLAYING, SET_CURRENT_INDEX} from "../../../store/mutations-types.js";
 
   import * as modes from "../../../common/js/modes.js";
 
-  import {modeMixin} from "../../../common/js/mixins.js";
+  import {modeMixin, favoriteMixin} from "../../../common/js/mixins.js";
 
   import animations from "create-keyframe-animation";
   import LyricParser from "lyric-parser";
 
   export default {
     name: "Player",
-    mixins: [modeMixin],
+    mixins: [modeMixin, favoriteMixin],
     data() {
       return {
         songReady: false,
@@ -282,6 +282,7 @@
         this.txt = txt;
       },
       _playLyric() {
+        if(!this.playing) return;  // 当要播放歌词的时候 先查看歌曲的播放状态是否为false 如果为false 说明歌曲没有播放 那么歌词也不需要播放
         this.lyricParser && this.lyricParser.play();
       },
       _stopLyric() {
@@ -335,7 +336,8 @@
         setCurrentIndex: SET_CURRENT_INDEX
       }),
       ...mapActions([
-        "addSongList"
+        "addSongList",
+        "addLatelyPlay"
       ])
     },
     computed: {
@@ -372,7 +374,10 @@
     watch: {
       playing() {  // 用于控制点击播放按钮时歌曲的播放和暂停
         if(this.playing) {
-          this.songReady && this.play();
+          if(this.songReady) {
+            this.play();
+            this.lyricParser.state === 0 && this.lyricParser.togglePlay();
+          }
         }else {
           this.pause();
         }
@@ -383,11 +388,12 @@
         }
       },
       currentSong(newVal, oldVal) {  // 当切换歌曲时 先让歌曲的ready状态变为false 这样当切换的歌曲ready时 就会触发watch的songReady的变化 让歌曲播放
-        if(newVal === oldVal) return;
+        if(newVal.songid === oldVal.songid || !newVal.songid) return;
         this.songReady = false;
         this.durationTime = this.currentSong.duration;
         this.$refs.lyricBox.scrollTo(0, 0, 100);
         this._getLyric();
+        this.addLatelyPlay({song: this.currentSong});
       },
       lineNum(newVal) {
         if(newVal < 5) {
@@ -597,7 +603,8 @@
           .right
             text-align left
             font-size 30px
-
+            .icon-favorite
+              color $color-sub-theme
     .mini-player
       position fixed
       left 0

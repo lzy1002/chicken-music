@@ -92,6 +92,8 @@
         flex 1
         flex-direction column
         justify-content center
+        overflow hidden
+        no-wrap()
         .song-info
           margin-top 10px
           color $color-text-d

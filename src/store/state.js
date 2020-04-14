@@ -1,6 +1,6 @@
 import * as modes from "../common/js/modes.js";
 
-import {loadSearchHistory} from "../common/js/cache.js";
+import {loadSearchHistory, loadFavorite, loadLately} from "../common/js/cache.js";
 
 export default {
   singer: {},
@@ -12,6 +12,8 @@ export default {
   fullScreen: false,
   disc: {},
   rank: {},
-  searchHistory: loadSearchHistory()
+  searchHistory: loadSearchHistory(),
+  favoriteList: loadFavorite(),
+  latelyPlay: loadLately()
 
 }
