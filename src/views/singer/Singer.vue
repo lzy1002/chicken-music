@@ -68,10 +68,8 @@
     methods: {
       _getSingerList() {
         getSingerList().then(res => {
-          console.log(res);
           if(res.code === ERR_OK) {
             this.singerList = this._normalizeSinger(res.data.list);
-            console.log(this.singerList);
           }
         })
       },
@@ -146,7 +144,6 @@
         this.$refs.singerScroll.scrollToElement(currentElement, 0);
       },
       toDetail(singerData) {
-        console.log(singerData);
         this.setSinger(singerData);
         this.$router.push(`/singer/${singerData.mid}`);
       },

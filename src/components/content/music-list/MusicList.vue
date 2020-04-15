@@ -30,9 +30,12 @@
 
   import {mapActions} from "vuex";
 
+  import {prefixStyle} from "../../../common/js/dom.js";
   import {playerMixin} from "../../../common/js/mixins.js";
 
   const TITLE_HEIGHT = 40;
+
+  const transform = prefixStyle("transform");
 
   export default {
     name: "MusicList",
@@ -140,7 +143,7 @@
 
         if(newVal >= 0) {
           blur = 0;
-          this.$refs.avatarBox.style.transform = `scale(${scale + ratio})`;
+          this.$refs.avatarBox.style[transform] = `scale(${scale + ratio})`;
         }else {
           blur = Math.min(20, Math.max(0, 20 * ratio));
         }

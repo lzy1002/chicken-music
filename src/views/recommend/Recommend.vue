@@ -2,7 +2,7 @@
   <div class="recommend-wrapper" ref="recommendWrapper">
     <scroll class="recommend-scroll" ref="recommendScroll" :data="discList">
       <div>
-        <slider v-if="sliderData.length" :auto-play="autoPlay">
+        <slider v-if="sliderData.length" ref="slider" :loop="loop" :auto-play="autoPlay">
           <div v-for="item in sliderData">
             <a :href="item.linkUrl">
               <img :src="item.picUrl">
@@ -57,8 +57,9 @@
     mixins: [playerMixin],
     data() {
       return {
+        loop: true,
+        autoPlay: true,
         sliderData: [],
-        autoPlay: false,
         discList: []
       }
     },
@@ -66,22 +67,30 @@
       this._getSliderData();
       this._getDiscList();
     },
+    activated() {
+      window.setTimeout(_ => {
+        if(this.autoPlay) {
+          this.$refs.slider && this.$refs.slider.play();
+        }
+      }, 20);
+    },
+    deactivated() {
+      if(this.autoPlay) {
+        this.$refs.slider && this.$refs.slider.pause();
+      }
+    },
     methods: {
       _getSliderData() {
         getSliderData().then(res => {
-          console.log(res);
           if(res.code === ERR_OK) {
             this.sliderData = res.data.slider;
-            console.log(this.sliderData);
           }
         })
       },
       _getDiscList() {
         getDiscList().then(res => {
-          console.log(res);
           if(res.data.code === ERR_OK) {
             this.discList = res.data.data.list;
-            console.log(this.discList);
           }
         })
       },

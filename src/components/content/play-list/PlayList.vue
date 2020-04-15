@@ -11,16 +11,16 @@
             <i class="icon-clear"></i>
           </div>
         </div>
-        <div class="play-list-content">
+        <div class="play-list-content" ref="content">
           <scroll class="content-scroll" ref="contentScroll" :data="sequenceList">
             <transition-group class="content" tag="ul" name="list">
-              <li class="content-item" ref="contentItem" :key="song.songid" v-for="(song, index) in sequenceList" @click="songClick(song, index)">
+              <li class="content-item" :key="song.songmid" v-for="(song, index) in sequenceList" @click="songClick(song, index)">
                 <i class="current" :class="getCurrent(song)"></i>
                 <span class="song-name">{{song.songname}}</span>
                 <div class="like" @click.stop="favoriteItem(song)">
                   <i :class="favoriteIcon(song)"></i>
                 </div>
-                <div class="delete" @click.stop="deleteItem(song, index)">
+                <div class="delete" @click.stop="deleteItem(song)">
                   <i class="icon-delete"></i>
                 </div>
               </li>
@@ -86,15 +86,15 @@
       },
       _scrollToCurrent() {
         const index = this.sequenceList.findIndex(item => item.songid === this.currentSong.songid);
-        this.$refs.contentScroll.scrollToElement(this.$refs.contentItem[index], 300);
+        this.$refs.contentScroll.scrollToElement(this.$refs.content.children[0].children[0].children[index], 300);  // 这里从父元素拿里面的子元素 因为如果直接获取里面的子元素 那么当数据发生变化后 新添加的dom在使用$refs获取集合时 会被放在集合的最后面 并不会按顺序排列 这里使用父元素来获取里面的子元素就可以避免这个问题
       },
-      deleteItem(song, index) {
+      deleteItem(song) {
         if(this.playList.length === 1) {
           this.setCurrentIndex(-1);
           this.setPlaying(false);
           this.hide();
         }
-        this.deleteSong({song: song, index: index});
+        this.deleteSong({song});
       },
       clearItem() {
         this.hide();
@@ -154,9 +154,9 @@
   @import "../../../common/stylus/mixin.styl"
 
   .move-fade-enter-active, .move-fade-leave-active
-    transition all 0.4s ease
+    transition all 0.5s ease
     .play-list
-      transition all 0.4s ease
+      transition all 0.5s ease
   .move-fade-enter, .move-fade-leave-to
     opacity 0
     .play-list

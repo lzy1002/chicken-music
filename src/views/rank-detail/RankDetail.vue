@@ -33,7 +33,6 @@
     methods: {
       _getRankDetail() {
         getRankDetail(this.rank.id).then(res => {
-          console.log(res);
           if(res.code === ERR_OK) {
             let songs = this._normalizeSongs(res.songlist);
             this._getMusicSource(songs);

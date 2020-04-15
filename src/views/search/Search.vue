@@ -1,7 +1,6 @@
 <template>
   <div class="search-wrapper">
     <search-box :placeholder="placeholder" @search="search" ref="searchBox"></search-box>
-
     <div class="shortcut-box" ref="shortcutBox" v-show="!searchVal">
       <scroll class="shortcut" ref="shortcutScroll" :data="searchHistory">
         <div class="content">
@@ -11,7 +10,6 @@
               <li class="hot-item" v-for="item in hotList" @click="hotClick(item.k)">{{item.k}}</li>
             </ul>
           </div>
-
           <div class="history-box" v-show="showHistoryBox">
             <h1 class="title">
               <span class="text">搜索历史</span>
@@ -26,7 +24,6 @@
         </div>
       </scroll>
     </div>
-
     <div class="result-box" ref="resultBox" v-show="searchVal">
       <suggest ref="suggest" :search-val="searchVal"></suggest>
     </div>
@@ -36,7 +33,6 @@
     <transition name="move">
       <router-view></router-view>
     </transition>
-
   </div>
 </template>
 
@@ -81,7 +77,6 @@
         getHotData().then(res => {
           if(res.code === ERR_OK) {
             this.hotList = res.data.hotkey.slice(0, 10);
-            console.log(this.hotList);
           }
         })
       },
@@ -176,7 +171,8 @@
                 border-radius 6px
                 background-color $color-highlight-background
           .history-box
-            margin 0 20px 20px 20px
+            margin 0 20px 0 20px
+            padding-bottom 10px
             .title
               display flex
               align-items center

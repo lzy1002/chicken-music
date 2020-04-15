@@ -129,7 +129,7 @@
   @import "../../../common/stylus/variable.styl"
 
   .move-enter-active, .move-leave-active
-    transition all 0.4s ease
+    transition all 0.5s ease
   .move-enter, .move-leave-to
     transform translate3d(100%, 0, 0)
 

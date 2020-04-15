@@ -1,5 +1,5 @@
 import {request} from "./request.js";
-import {commonParams, options} from "./config.js";
+import {commonParams} from "./config.js";
 
 import {ERR_OK} from "./config.js";
 

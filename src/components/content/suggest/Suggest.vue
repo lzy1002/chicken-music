@@ -1,17 +1,17 @@
 <template>
   <div class="suggest-wrapper" ref="suggestWrapper">
     <scroll class="suggest-scroll" ref="suggestScroll" :data="resultArr" @pullUp="pullUp">
-      <ul class="content">
-        <li class="result-item" v-for="item in resultArr" @click="resultItemClick(item)">
+      <div class="content">
+        <div class="result-item" v-for="item in resultArr" @click="resultItemClick(item)">
           <div class="icon">
             <i :class="resultIcon(item)"></i>
           </div>
           <p class="text">{{resultText(item)}}</p>
-        </li>
+        </div>
         <div class="loading-wrapper" v-show="moreFlag">
           <loading text=""></loading>
         </div>
-      </ul>
+      </div>
     </scroll>
     <div class="no-result-box" v-show="showNoResult">
       <no-result></no-result>
@@ -60,7 +60,6 @@
     methods: {
       _getResultData() {
         getResultData(this.searchVal, this.page, this.perpage, this.zhida).then(res => {
-          console.log(res);
           if(res.data.code === ERR_OK) {
             this._normalizeResult(res);
           }

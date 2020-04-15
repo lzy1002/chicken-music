@@ -102,12 +102,16 @@
   import {mapGetters, mapMutations, mapActions} from "vuex";
   import {SET_FULL_SCREEN, SET_PLAYING, SET_CURRENT_INDEX} from "../../../store/mutations-types.js";
 
+  import {prefixStyle} from "../../../common/js/dom.js";
   import * as modes from "../../../common/js/modes.js";
-
   import {modeMixin, favoriteMixin} from "../../../common/js/mixins.js";
 
   import animations from "create-keyframe-animation";
   import LyricParser from "lyric-parser";
+
+  const transform = prefixStyle("transform");
+  const transition = prefixStyle("transition");
+  const animation = prefixStyle("animation");
 
   export default {
     name: "Player",
@@ -168,19 +172,19 @@
       },
       afterEnter() {
         animations.unregisterAnimation("move");
-        this.$refs.normalCd.style.animation = "none";
+        this.$refs.normalCd.style[animation] = "none";
       },
       leave(el, done) {
         let {x, y, scale} = this._calculateMove();
 
-        this.$refs.normalCd.style.transition = "all 0.2s ease";
-        this.$refs.normalCd.style.transform = `translate3d(${-x}px, ${y}px, 0) scale(${scale})`;
+        this.$refs.normalCd.style[transition] = "all 0.2s ease";
+        this.$refs.normalCd.style[transform] = `translate3d(${-x}px, ${y}px, 0) scale(${scale})`;
 
         this.$refs.normalCd.addEventListener("transitionend", done);
       },
       afterLeave() {
-        this.$refs.normalCd.style.transition = "none";
-        this.$refs.normalCd.style.transform = "none";
+        this.$refs.normalCd.style[transition] = "none";
+        this.$refs.normalCd.style[transform] = "none";
       },
       _calculateMove() {
         let miniCd = this.$refs.miniCd;
@@ -292,8 +296,8 @@
         this.lyricParser && this.lyricParser.seek(currentTime);
       },
       middleTouchStart(e) {
-        this.$refs.middleR.style.transition = "none";
-        this.$refs.middleL.style.transition = "none";
+        this.$refs.middleR.style[transition] = "none";
+        this.$refs.middleL.style[transition] = "none";
         this.touch.ratio = 0;
 
         this.touch.targetX = this.middleFlag === "cd" ? -window.innerWidth : 0;
@@ -306,7 +310,7 @@
         this.touch.diffX = e.touches[0].pageX - this.touch.startX;
         let moveX = this.touch.currentX + this.touch.diffX;
         moveX = Math.max(-window.innerWidth, Math.min(0, moveX));
-        this.$refs.middleR.style.transform = `translate3d(${moveX}px, 0, 0)`;
+        this.$refs.middleR.style[transform] = `translate3d(${moveX}px, 0, 0)`;
         if((this.middleFlag === "cd" && this.touch.diffX < 0) || (this.middleFlag === "lyric" && this.touch.diffX > 0)) {
           this.touch.ratio = Math.abs(this.touch.diffX) / window.innerWidth;
         }
@@ -314,15 +318,15 @@
       },
       middleTouchEnd() {
         if(this.touch.ratio >= 0.3) {
-          this.$refs.middleR.style.transition = "all 0.4s ease";
-          this.$refs.middleR.style.transform = `translate3d(${this.touch.targetX}px, 0, 0)`;
-          this.$refs.middleL.style.transition = "all 0.4s ease";
+          this.$refs.middleR.style[transition] = "all 0.4s ease";
+          this.$refs.middleR.style[transform] = `translate3d(${this.touch.targetX}px, 0, 0)`;
+          this.$refs.middleL.style[transition] = "all 0.4s ease";
           this.$refs.middleL.style.opacity = this.touch.targetOpacity;
           this.middleFlag = this.middleFlag === "cd" ? "lyric" : "cd";
         }else {
-          this.$refs.middleR.style.transition = "all 0.4s ease";
-          this.$refs.middleR.style.transform = `translate3d(${this.touch.currentX}px, 0, 0)`;
-          this.$refs.middleL.style.transition = "all 0.4s ease";
+          this.$refs.middleR.style[transition] = "all 0.4s ease";
+          this.$refs.middleR.style[transform] = `translate3d(${this.touch.currentX}px, 0, 0)`;
+          this.$refs.middleL.style[transition] = "all 0.4s ease";
           this.$refs.middleL.style.opacity = this.touch.currentOpacity;
         }
 

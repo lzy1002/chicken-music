@@ -77,7 +77,7 @@ export const insertSong = ({commit, state}, {song}) => {
 
 };
 
-export const deleteSong = ({commit, state}, {song, index}) => {
+export const deleteSong = ({commit, state}, {song}) => {
   let playList = state.playList.slice();
   let sequenceList = state.sequenceList.slice();
   let playListIndex = findSongIndex(playList, item => item.songid === song.songid);

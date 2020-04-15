@@ -51,10 +51,8 @@
       },
       _getMusicSource(songs) {
         getMusicSource(songs).then(res => {
-          console.log(res);
           this.songList = res;
         })
-
       }
     },
     computed: {

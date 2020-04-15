@@ -19,7 +19,7 @@
     props: {
       loop: {
         type: Boolean,
-        default: true
+        default: false
       },
       autoPlay: {
         type: Boolean,
@@ -27,7 +27,7 @@
       },
       interval: {
         type: Number,
-        default: 3000
+        default: 4000
       }
     },
     data() {
@@ -36,6 +36,9 @@
         dots: [],
         currentIndex: 0
       }
+    },
+    created() {
+      this.timeId = "";
     },
     mounted() {
       window.setTimeout(_ => {
@@ -83,22 +86,25 @@
         });
 
         if(this.autoPlay) {
-          this._play();
+          this.play();
         }
 
         this.scroll.on("scrollEnd", () => {
-          window.clearTimeout(this.timeId);
           this.currentIndex = this.scroll.getCurrentPage().pageX;
           if(this.autoPlay) {
-            this._play();
+            this.play();
           }
         })
 
       },
-      _play() {
+      play() {
+        window.clearTimeout(this.timeId);
         this.timeId = window.setTimeout(_ => {
           this.scroll.next();
         }, this.interval);
+      },
+      pause() {
+        window.clearTimeout(this.timeId);
       },
       _initDots() {
         this.dots = new Array(this.children.length);
