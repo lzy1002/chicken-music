@@ -63,9 +63,9 @@
         this.sectionFlag = key;
       },
       randomPlayAll() {
-        if(this.sectionFlag === "favorite") {
+        if(this.sectionFlag === "favorite" && this.formatFavoriteList.length > 0) {
           this.addRandomList({list: this.formatFavoriteList});
-        }else {
+        }else if(this.sectionFlag === "lately" && this.formatLatelyPlay.length > 0) {
           this.addRandomList({list: this.formatLatelyPlay});
         }
       },
