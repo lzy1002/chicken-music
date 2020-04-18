@@ -1,13 +1,19 @@
 <template>
   <div class="no-result-wrapper">
     <div class="img"></div>
-    <p class="text">抱歉, 暂无搜索结果</p>
+    <p class="text">{{text}}</p>
   </div>
 </template>
 
 <script>
   export default {
-    name: "NoResult"
+    name: "NoResult",
+    props: {
+      text: {
+        type: String,
+        default: "抱歉, 暂无内容"
+      }
+    }
   }
 </script>
 

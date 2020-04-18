@@ -36,8 +36,6 @@
         <div class="close" @click="hide">关闭</div>
       </div>
       <confirm :text="confirmText" :right="rightText" @rightClick="clearItem" ref="confirm"></confirm>
-
-      <add-list ref="addList"></add-list>
     </div>
   </transition>
 
@@ -46,7 +44,6 @@
 <script>
   import Scroll from "../../../components/common/scroll/Scroll.vue";
   import confirm from "../../../components/common/confirm/Confirm.vue";
-  import AddList from "../../../components/content/add-list/AddList.vue";
 
   import * as modes from "../../../common/js/modes.js";
 
@@ -104,7 +101,7 @@
         this.$refs.confirm.show();
       },
       addList() {
-        this.$refs.addList.show();
+        this.$emit("addList");
       },
       ...mapMutations({
         setCurrentIndex: SET_CURRENT_INDEX,
@@ -128,8 +125,7 @@
     },
     components: {
       Scroll,
-      confirm,
-      AddList
+      confirm
     },
     watch: {
       showFlag(newVal) {

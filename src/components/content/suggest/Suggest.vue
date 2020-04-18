@@ -14,7 +14,7 @@
       </div>
     </scroll>
     <div class="no-result-box" v-show="showNoResult">
-      <no-result></no-result>
+      <no-result :text="noResultText"></no-result>
     </div>
   </div>
 </template>
@@ -54,7 +54,8 @@
         resultArr: [],
         singerArr: [],
         songArr: [],
-        moreFlag: true
+        moreFlag: true,
+        noResultText: "抱歉, 暂无搜索结果"
       }
     },
     methods: {

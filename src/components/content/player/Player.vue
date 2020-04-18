@@ -85,9 +85,11 @@
           <i class="icon-playlist" @click.stop="showPlayList"></i>
         </div>
 
-        <play-list ref="playList"></play-list>
+        <play-list ref="playList" @addList="showAddList"></play-list>
       </div>
     </transition>
+
+    <add-list ref="addList"></add-list>
 
     <audio :src="currentSong.url" ref="audio" @canplay="ready" @error="error" @timeupdate="timeUpDate" @ended="ended"></audio>
   </div>
@@ -98,6 +100,7 @@
   import Scroll from "../../common/scroll/Scroll.vue";
   import ProgressCircle from "../progress-circle/ProgressCircle.vue";
   import PlayList from "../play-list/PlayList.vue";
+  import AddList from "../add-list/AddList.vue";
 
   import {mapGetters, mapMutations, mapActions} from "vuex";
   import {SET_FULL_SCREEN, SET_PLAYING, SET_CURRENT_INDEX} from "../../../store/mutations-types.js";
@@ -134,7 +137,8 @@
       ProgressBar,
       Scroll,
       ProgressCircle,
-      PlayList
+      PlayList,
+      AddList
     },
     methods: {
       hide() {
@@ -333,6 +337,10 @@
       },
       showPlayList() {
         this.$refs.playList.show();
+      },
+      showAddList() {
+        console.log(123);
+        this.$refs.addList.show();
       },
       ...mapMutations({
         setFullScreen: SET_FULL_SCREEN,

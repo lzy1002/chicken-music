@@ -28,6 +28,9 @@
             </div>
           </scroll>
         </div>
+        <div class="no-result-box" v-show="noResultIsShow">
+          <no-result :text="noResultText"></no-result>
+        </div>
       </div>
     </div>
   </transition>
@@ -37,6 +40,7 @@
   import Switches from "../../components/common/switches/Switches.vue";
   import Scroll from "../../components/common/scroll/Scroll.vue";
   import SongList from "../../components/content/song-list/SongList.vue";
+  import NoResult from "../../components/content/no-result/NoResult.vue";
 
   import {Song} from "../../common/js/song.js";
   import {playerMixin} from "../../common/js/mixins.js";
@@ -49,7 +53,8 @@
     data() {
       return {
         titles: [{key: "favorite", text: "我喜欢的"}, {key: "lately", text: "最近听的"}],
-        sectionFlag: "favorite"
+        sectionFlag: "favorite",
+        noResultText: "暂无收藏歌曲数据"
       }
     },
     methods: {
@@ -100,6 +105,16 @@
           return song;
         });
       },
+      noResultIsShow() {
+        if(this.sectionFlag === "favorite" && this.favoriteList.length <= 0) {
+          this.noResultText = "暂无收藏歌曲数据";
+          return true;
+        }else if(this.sectionFlag === "lately" && this.latelyPlay.length <= 0) {
+          this.noResultText = "暂无播放历史数据";
+          return true;
+        }
+        return false;
+      },
       ...mapGetters([
         "favoriteList",
         "latelyPlay"
@@ -119,7 +134,8 @@
     components: {
       Switches,
       Scroll,
-      SongList
+      SongList,
+      NoResult
     }
   }
 </script>
@@ -189,5 +205,9 @@
         .lately-scroll
           width 100%
           height 100%
-
+      .no-result-box
+        position absolute
+        top 30%
+        left 0
+        right 0
 </style>

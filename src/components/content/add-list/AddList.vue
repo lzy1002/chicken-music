@@ -30,6 +30,7 @@
       <div class="suggest-box" v-show="searchKey">
         <suggest :zhida="zhida" :search-val="searchKey"></suggest>
       </div>
+      <top-tip :text="topTipText" ref="topTip"></top-tip>
     </div>
   </transition>
 </template>
@@ -38,6 +39,7 @@
   import Scroll from "../../common/scroll/Scroll.vue";
   import SearchBox from "../../common/search-box/SearchBox.vue";
   import Switches from "../../common/switches/Switches.vue";
+  import TopTip from "../../common/top-tip/TopTip.vue";
   import SongList from "../../content/song-list/SongList.vue";
   import HistoryList from "../../content/history-list/HistoryList.vue";
   import Suggest from "../../content/suggest/Suggest.vue";
@@ -55,7 +57,8 @@
         titles: [{key: "lately", text: "最近播放"}, {key: "history", text: "搜索历史"}],
         toggleFlag: "lately",
         searchKey: "",
-        zhida: false
+        zhida: false,
+        topTipText: "1首歌曲已添加到播放列表"
       }
     },
     mounted() {
@@ -100,7 +103,8 @@
       },
       ...mapGetters([
         "latelyPlay",
-        "searchHistory"
+        "searchHistory",
+        "currentSong"
       ])
     },
     watch: {
@@ -112,12 +116,16 @@
             this.$refs.historyScroll.refresh();
           }
         }, 20);
+      },
+      currentSong(newVal, oldVal) {
+        newVal.songid !== oldVal.songid && this.$refs.topTip.show();
       }
     },
     components: {
       Scroll,
       SearchBox,
       Switches,
+      TopTip,
       SongList,
       HistoryList,
       Suggest
@@ -133,12 +141,18 @@
   .move-enter, .move-leave-to
     transform translate3d(100%, 0, 0)
 
+  .slide-enter-active, .slide-leave-active
+    transition all 0.5s ease
+  .slide-enter, .slide-leave-to
+    transform translate3d(0, -100%, 0)
+
   .add-list-wrapper
     position fixed
     top 0
     left 0
     right 0
     bottom 0
+    z-index 1000
     overflow hidden
     background-color $color-background
     .add-list-header
@@ -192,5 +206,4 @@
       right 0
       bottom 0
       background-color $color-background
-
 </style>
